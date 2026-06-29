@@ -254,7 +254,7 @@ async function loadCalls() {
       headers: { 'Authorization': `Zoho-oauthtoken ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ select_query: query })
     });
-    if(res.status===401){ logout(); return; }
+    if(res.status===401){ const body = await res.text(); throw new Error(`401 Unauthorized — token may lack scope. Response: ${body.substring(0,200)}`); }
     if(!res.ok) throw new Error(`Zoho API error: ${res.status}`);
     const data = await res.json();
     const raw = data.data || [];
