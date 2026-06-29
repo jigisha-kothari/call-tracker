@@ -1,0 +1,24 @@
+name: Get Zoho Refresh Token (one-time setup)
+
+on:
+  workflow_dispatch:
+    inputs:
+      auth_code:
+        description: 'Zoho Self Client auth code'
+        required: true
+
+jobs:
+  exchange:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exchange code for refresh token
+        run: |
+          RESPONSE=$(curl -s -X POST "https://accounts.zoho.eu/oauth/v2/token" \
+            -d "grant_type=authorization_code" \
+            -d "client_id=${{ secrets.ZOHO_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.ZOHO_CLIENT_SECRET }}" \
+            -d "code=${{ github.event.inputs.auth_code }}")
+          echo "Full response: $RESPONSE"
+          echo ""
+          REFRESH=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print('REFRESH TOKEN: ' + d.get('refresh_token', 'NOT FOUND - error: ' + str(d)))")
+          echo "$REFRESH"
