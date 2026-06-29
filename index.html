@@ -338,7 +338,20 @@ function renderSummary(dateVal) {
   el.innerHTML=`
     <div class="sum-box"><div class="sum-title"><i class="ti ti-chart-bar"></i> Performance snapshot</div><div class="sum-body"><strong>${total}</strong> calls on ${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}. Total talk time: <strong>${fmtDur(totalSecs)}</strong> · <strong>${connected.length}</strong> connected · <strong>${total-connected.length}</strong> no answer.${longest&&longest.duration>0?` Longest: <strong>${longest.contactName}</strong> at ${fmtDur(longest.duration)}.`:''}${germaine.length?`<br>Germaine (Nexus): <strong>${germaine.length} calls</strong> · ${germaine.filter(c=>c.duration>30).length} connected.`:''}${sarah.length?`<br>Sarah (Kendra): <strong>${sarah.length} calls</strong> · ${sarah.filter(c=>c.duration>30).length} connected.`:''}</div></div>
     ${breaches.length>0?`<div class="sum-box"><div class="sum-title"><i class="ti ti-alert-triangle"></i> 2-minute rule — ${breaches.length} breach${breaches.length>1?'es':''} flagged</div><div class="sum-body">${breaches.map(b=>`Gap of <strong>${fmtGap(b.gap)}</strong> after call with ${b.from.contactName} at ${fmtTime(b.from.startTime)}.`).join('<br>')}</div></div>`:`<div class="sum-box"><div class="sum-title"><i class="ti ti-circle-check"></i> 2-minute rule — no breaches</div><div class="sum-body">All gaps within the 2-minute limit. Great work!</div></div>`}
-    <div class="btn-row"><a href="mailto:j.kothari@kendra-intl.com?subject=End of Day Call Summary ${dateVal}&body=Calls: ${total}%0AConnected: ${connected.length}%0ATalk time: ${fmtDur(totalSecs)}%0AGap breaches: ${breaches.length}" class="btn"><i class="ti ti-mail"></i> Email summary to Jigisha</a></div>`;
+    <div class="btn-row"><a href="mailto:j.kothari@kendra-intl.com?subject=End of Day Call Summary ${dateVal}&body=${encodeURIComponent(
+      `End of Day Call Summary — ${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}\n\n` +
+      `OVERVIEW\n` +
+      `Total Calls: ${total}\n` +
+      `Connected: ${connected.length}\n` +
+      `No Answer: ${total - connected.length}\n` +
+      `Total Talk Time: ${fmtDur(totalSecs)}\n` +
+      `Gap Breaches (>2 min): ${breaches.length}\n\n` +
+      (germaine.length ? `Germaine (Nexus): ${germaine.length} calls, ${germaine.filter(c=>c.duration>30).length} connected\n` : '') +
+      (sarah.length ? `Sarah (Kendra): ${sarah.length} calls, ${sarah.filter(c=>c.duration>30).length} connected\n` : '') +
+      `\nCALL LOG\n` +
+      allCalls.map((c,i) => `${i+1}. ${fmtTime(c.startTime)} — ${c.contactName} (${c.owner}) — ${fmtDur(c.duration)} — ${c.duration>30?'Connected':c.duration>0?'Short':'No answer'}`).join('\n') +
+      (breaches.length ? `\n\nGAP BREACHES\n` + breaches.map(b=>`- ${fmtGap(b.gap)} after ${b.from.contactName} at ${fmtTime(b.from.startTime)}`).join('\n') : '')
+    )}" class="btn"><i class="ti ti-mail"></i> Email summary to Jigisha</a></div>`;
 }
 
 function switchTab(id,btn){
