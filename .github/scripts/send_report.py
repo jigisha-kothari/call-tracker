@@ -124,7 +124,7 @@ body += '\n\n—\nSent automatically by Call Tracker'
 # Send via Zoho SMTP
 msg = MIMEMultipart()
 msg['From'] = os.environ['SMTP_USER']
-msg['To'] = 'admin@kendraintl.onmicrosoft.com, j.kothari@kendra-intl.com'
+msg['To'] = 's.swarup@kendra-intl.com, j.kothari@kendra-intl.com'
 msg['Subject'] = 'Call Summary Report — ' + today_display
 msg.attach(MIMEText(body, 'plain'))
 
@@ -132,7 +132,7 @@ with smtplib.SMTP_SSL('smtp.zoho.eu', 465) as server:
     server.login(os.environ['SMTP_USER'], os.environ['SMTP_PASS'])
     server.sendmail(
         os.environ['SMTP_USER'],
-        ['admin@kendraintl.onmicrosoft.com', 'j.kothari@kendra-intl.com'],
+        ['s.swarup@kendra-intl.com', 'j.kothari@kendra-intl.com'],
         msg.as_string()
     )
 
