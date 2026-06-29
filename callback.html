@@ -28,9 +28,10 @@
     const expiry = Date.now() + (seconds * 1000);
     sessionStorage.setItem('zoho_access_token', accessToken);
     sessionStorage.setItem('zoho_token_expiry', String(expiry));
-    window.location.href = '/call-tracker/';
+    document.querySelector('p').textContent = 'Login successful! Redirecting...';
+    setTimeout(() => { window.location.href = '/call-tracker/'; }, 500);
   } else {
-    document.querySelector('p').textContent = 'Authentication failed. Please try again.';
+    document.querySelector('p').textContent = 'No token found in URL. Hash: ' + window.location.hash.substring(0, 100);
   }
 </script>
 </body>
