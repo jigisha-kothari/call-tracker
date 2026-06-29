@@ -198,6 +198,7 @@ function logout() {
 }
 
 function getToken() {
+  if (window._zohoToken && Date.now() < window._zohoExpiry) return window._zohoToken;
   const token = sessionStorage.getItem('zoho_access_token');
   const expiry = sessionStorage.getItem('zoho_token_expiry');
   if (token && expiry && Date.now() < parseInt(expiry)) return token;
@@ -205,6 +206,18 @@ function getToken() {
 }
 
 function init() {
+  // Read token from URL hash (fallback for Edge tracking prevention)
+  if (window.location.hash) {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const t = params.get('token');
+    const e = params.get('expiry');
+    if (t && e) {
+      window._zohoToken = t;
+      window._zohoExpiry = parseInt(e);
+      try { sessionStorage.setItem('zoho_access_token', t); sessionStorage.setItem('zoho_token_expiry', e); } catch(err) {}
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }
   const token = getToken();
   if (token) {
     document.getElementById('loginScreen').style.display = 'none';

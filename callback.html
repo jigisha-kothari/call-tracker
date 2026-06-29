@@ -26,12 +26,14 @@
   if (accessToken) {
     const seconds = parseInt(expiresIn) || 3600;
     const expiry = Date.now() + (seconds * 1000);
-    sessionStorage.setItem('zoho_access_token', accessToken);
-    sessionStorage.setItem('zoho_token_expiry', String(expiry));
-    document.querySelector('p').textContent = 'Login successful! Redirecting...';
-    setTimeout(() => { window.location.href = '/call-tracker/'; }, 500);
+    // Try sessionStorage first, fall back to passing token in URL hash
+    try {
+      sessionStorage.setItem('zoho_access_token', accessToken);
+      sessionStorage.setItem('zoho_token_expiry', String(expiry));
+    } catch(e) {}
+    window.location.href = '/call-tracker/#token=' + encodeURIComponent(accessToken) + '&expiry=' + expiry;
   } else {
-    document.querySelector('p').textContent = 'No token found in URL. Hash: ' + window.location.hash.substring(0, 100);
+    document.querySelector('p').textContent = 'Authentication failed. Please try again.';
   }
 </script>
 </body>
