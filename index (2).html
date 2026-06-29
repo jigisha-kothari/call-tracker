@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Call Tracker · Kendra & Nexus</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F7F6F3;
+      --bg2: #EEECEA;
+      --surface: #FFFFFF;
+      --border: #E0DDD8;
+      --border2: #D0CCC6;
+      --text: #1A1917;
+      --text2: #6B6862;
+      --text3: #9B9790;
+      --green: #1D9E75;
+      --green-bg: #E1F5EE;
+      --green-text: #085041;
+      --amber: #BA7517;
+      --amber-bg: #FAEEDA;
+      --amber-text: #633806;
+      --red: #C0392B;
+      --red-bg: #FDECEA;
+      --red-text: #7B1A12;
+      --blue: #2563EB;
+      --blue-bg: #EFF6FF;
+      --blue-text: #1E40AF;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── LAYOUT ── */
+    .shell { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── HEADER ── */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem; }
+    .header-left {}
+    .brand { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); }
+    .brand span { color: var(--text2); font-weight: 400; }
+    .subtitle { font-size: 13px; color: var(--text2); margin-top: 3px; }
+    .header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    /* ── CONTROLS ── */
+    .ctrl { font-size: 13px; padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: inherit; cursor: pointer; }
+    .ctrl:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+    .btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); font-family: inherit; cursor: pointer; font-weight: 500; transition: background 0.15s; }
+    .btn:hover { background: var(--bg2); }
+    .btn-primary { background: var(--text); color: #fff; border-color: var(--text); }
+    .btn-primary:hover { background: #333; }
+
+    /* ── METRICS ── */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.75rem; }
+    @media(max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+    .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.125rem; box-shadow: var(--shadow); }
+    .metric-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    .metric-value { font-size: 26px; font-weight: 600; letter-spacing: -0.5px; color: var(--text); line-height: 1; }
+    .metric-sub { font-size: 11px; color: var(--text3); margin-top: 5px; }
+    .metric-value.warn { color: var(--red); }
+
+    /* ── TABS ── */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+    .tab { padding: 9px 18px; font-size: 13px; font-weight: 500; background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; color: var(--text2); font-family: inherit; margin-bottom: -1px; transition: color 0.15s; }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--text); border-bottom-color: var(--text); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── CALL LOG ── */
+    .sec-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 10px; }
+    .call-list { display: flex; flex-direction: column; gap: 6px; }
+    .call-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 14px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow); transition: border-color 0.15s; }
+    .call-row:hover { border-color: var(--border2); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+    .call-info { flex: 1; min-width: 0; }
+    .call-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .call-sub { font-size: 12px; color: var(--text2); margin-top: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .call-right { text-align: right; flex-shrink: 0; }
+    .call-dur { font-size: 14px; font-weight: 500; }
+    .call-time-str { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* ── BADGES ── */
+    .badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; display: inline-block; letter-spacing: 0.2px; }
+    .b-connected { background: var(--green-bg); color: var(--green-text); }
+    .b-short { background: var(--amber-bg); color: var(--amber-text); }
+    .b-missed { background: var(--bg2); color: var(--text2); }
+    .caller-tag { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 20px; }
+    .tag-germaine { background: var(--blue-bg); color: var(--blue-text); }
+    .tag-sarah { background: var(--green-bg); color: var(--green-text); }
+    .tag-other { background: var(--bg2); color: var(--text2); }
+
+    /* ── TIMELINE ── */
+    .tl { position: relative; padding-left: 24px; }
+    .tl-item { position: relative; padding-bottom: 14px; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-line { position: absolute; left: -17px; top: 16px; bottom: 0; width: 1px; background: var(--border); }
+    .tl-item:last-child .tl-line { display: none; }
+    .tl-dot { position: absolute; left: -21px; top: 10px; width: 8px; height: 8px; border-radius: 50%; }
+    .tl-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; box-shadow: var(--shadow); }
+    .tl-hdr { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+    .tl-name { font-size: 13px; font-weight: 500; }
+    .tl-meta { font-size: 11px; color: var(--text2); }
+    .gap-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+    .gap-line { flex: 1; height: 1px; border-top: 1px dashed var(--border); }
+    .gap-badge { font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .gap-ok { background: var(--green-bg); color: var(--green-text); }
+    .gap-warn { background: var(--amber-bg); color: var(--amber-text); }
+    .gap-bad { background: var(--red-bg); color: var(--red-text); }
+
+    /* ── SUMMARY ── */
+    .sum-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: var(--shadow); }
+    .sum-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+    .sum-body { font-size: 13px; color: var(--text2); line-height: 1.75; }
+    .sum-body strong { color: var(--text); }
+    .btn-row { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
+
+    /* ── STATES ── */
+    .empty-state { text-align: center; padding: 2.5rem; color: var(--text3); font-size: 13px; }
+    .empty-state i { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.4; }
+    .loading-state { text-align: center; padding: 2rem; color: var(--text2); font-size: 13px; }
+    .note-bar { font-size: 11px; color: var(--text2); background: var(--bg2); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 12px; border-left: 3px solid var(--border2); line-height: 1.6; }
+
+    /* ── LEGEND ── */
+    .legend { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── FOOTER ── */
+    .footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: center; font-size: 11px; color: var(--text3); }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="brand">Call Tracker <span>· Kendra & Nexus</span></div>
+      <div class="subtitle" id="subtitle">Powered by Zoho Dialer</div>
+    </div>
+    <div class="header-right">
+      <input type="date" id="dateFilter" class="ctrl">
+      <select id="ownerFilter" class="ctrl">
+        <option value="">All callers</option>
+        <option value="germaine">Germaine (Nexus)</option>
+        <option value="sarah">Sarah (Kendra)</option>
+      </select>
+      <button class="btn btn-primary" onclick="loadCalls()">
+        <i class="ti ti-refresh"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-phone"></i> Total calls</div>
+      <div class="metric-value" id="mTotal">—</div>
+      <div class="metric-sub" id="mSub1">loading...</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-clock"></i> Talk time</div>
+      <div class="metric-value" id="mTalk">—</div>
+      <div class="metric-sub" id="mSub2">avg per call</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-alert-triangle"></i> Longest gap</div>
+      <div class="metric-value" id="mGap">—</div>
+      <div class="metric-sub" id="mSub3">between calls</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label"><i class="ti ti-check"></i> Connected</div>
+      <div class="metric-value" id="mConn">—</div>
+      <div class="metric-sub" id="mSub4">connection rate</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('calls',this)">Call log</button>
+    <button class="tab" onclick="switchTab('timeline',this)">Timeline</button>
+    <button class="tab" onclick="switchTab('summary',this)">Day summary</button>
+  </div>
+
+  <!-- CALL LOG -->
+  <div id="calls" class="panel active">
+    <div class="sec-label">Calls · sorted by time</div>
+    <div class="call-list" id="callList">
+      <div class="loading-state"><i class="ti ti-loader"></i> Fetching from Zoho CRM...</div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div id="timeline" class="panel">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> &lt;2 min (ok)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> 2–5 min (warn)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> &gt;5 min (breach)</div>
+    </div>
+    <div class="tl" id="timelineEl">
+      <div class="loading-state">Loading...</div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="summary" class="panel">
+    <div id="summaryEl">
+      <div class="loading-state">Loading...</div>
+    </div>
+  </div>
+
+  <div class="footer">Call data pulled live from Zoho CRM · Zoho Dialer logs automatically · Refresh to update</div>
+
+</div>
+
+<script>
+const MCP_URL = "https://claude-zohocrm.zohomcp.eu/mcp/message";
+const AVATARBG = ["#E6F1FB","#E1F5EE","#FAEEDA","#FBEAF0","#EEEDFE"];
+const AVATARTX = ["#0C447C","#085041","#633806","#72243E","#3C3489"];
+let allCalls = [];
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+document.getElementById('dateFilter').value = todayStr();
+
+async function callMCP(method, params) {
+  const res = await fetch(MCP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.result;
+}
+
+async function loadCalls() {
+  ['callList','timelineEl','summaryEl'].forEach(id => {
+    document.getElementById(id).innerHTML = '<div class="loading-state"><i class="ti ti-loader"></i> Fetching from Zoho CRM...</div>';
+  });
+
+  const dateVal = document.getElementById('dateFilter').value || todayStr();
+  const ownerVal = document.getElementById('ownerFilter').value;
+
+  try {
+    const result = await callMCP("tools/call", {
+      name: "executeCOQLQuery",
+      arguments: {
+        body: {
+          select_query: `SELECT id, Subject, Call_Duration, Call_Duration_in_seconds, Call_Start_Time, Call_Type, Who_Id, Owner FROM Calls WHERE Call_Start_Time >= '${dateVal}T00:00:00+05:30' AND Call_Start_Time <= '${dateVal}T23:59:59+05:30' ORDER BY Call_Start_Time ASC LIMIT 100`
+        }
+      }
+    });
+
+    let raw = [];
+    if (result?.content) {
+      for (const block of result.content) {
+        if (block.type === "text") { try { raw = JSON.parse(block.text).data || []; } catch(e){} }
+        else if (block.type === "mcp_tool_result") { try { raw = JSON.parse(block.content?.[0]?.text||"{}").data || []; } catch(e){} }
+      }
+    }
+
+    allCalls = raw.map(c => ({
+      id: c.id,
+      contactName: c.Who_Id?.name || extractName(c.Subject),
+      duration: c.Call_Duration_in_seconds || 0,
+      startTime: new Date(c.Call_Start_Time),
+      type: c.Call_Type || "Outbound",
+      owner: c.Owner?.name || "Unknown"
+    })).filter(c => !ownerVal || c.owner.toLowerCase().includes(ownerVal.toLowerCase()));
+
+    renderAll(dateVal);
+  } catch(err) {
+    const msg = `<div class="empty-state"><i class="ti ti-alert-circle"></i>Could not load calls: ${err.message}</div>`;
+    ['callList','timelineEl','summaryEl'].forEach(id => document.getElementById(id).innerHTML = msg);
+  }
+}
+
+function extractName(subject) {
+  if (!subject) return "Unknown";
+  const m = subject.match(/(?:to|with)\s+([A-Za-z\s]+?)(?:\s+\(|$)/i);
+  return m ? m[1].trim() : "Unknown";
+}
+
+function initials(n) { return n.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+function avatarStyle(n) { const i = n.charCodeAt(0)%5; return `background:${AVATARBG[i]};color:${AVATARTX[i]}`; }
+function fmtDur(s) { if(!s)return"0s"; const m=Math.floor(s/60),r=s%60; return m===0?`${r}s`:r===0?`${m}m`:`${m}m ${r}s`; }
+function fmtTime(d) { return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function fmtGap(s) { const m=Math.round(s/60); if(m<60)return`${m}m gap`; const h=Math.floor(m/60),r=m%60; return r?`${h}h ${r}m gap`:`${h}h gap`; }
+function gapSev(s) { return s<=2*60?'ok':s<=5*60?'warn':'bad'; }
+
+function callBadge(c) {
+  if(c.duration>30)return'<span class="badge b-connected">Connected</span>';
+  if(c.duration>0)return'<span class="badge b-short">Short</span>';
+  return'<span class="badge b-missed">No answer</span>';
+}
+function callerTag(o) {
+  const l=o.toLowerCase();
+  if(l.includes('germaine'))return`<span class="caller-tag tag-germaine">Germaine · Nexus</span>`;
+  if(l.includes('sarah'))return`<span class="caller-tag tag-sarah">Sarah · Kendra</span>`;
+  return`<span class="caller-tag tag-other">${o}</span>`;
+}
+
+function renderAll(dateVal) {
+  const d = new Date(dateVal+'T12:00:00');
+  document.getElementById('subtitle').textContent = `${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · Zoho Dialer`;
+  renderMetrics();
+  renderCallLog();
+  renderTimeline();
+  renderSummary(dateVal);
+}
+
+function renderMetrics() {
+  const total = allCalls.length;
+  const connected = allCalls.filter(c=>c.duration>30).length;
+  const totalSecs = allCalls.reduce((a,c)=>a+c.duration,0);
+  const avgSecs = total>0?Math.round(totalSecs/total):0;
+  let maxGap=0;
+  for(let i=1;i<allCalls.length;i++){
+    const g=(allCalls[i].startTime-allCalls[i-1].startTime)/1000-allCalls[i-1].duration;
+    if(g>maxGap)maxGap=g;
+  }
+  document.getElementById('mTotal').textContent = total||'0';
+  document.getElementById('mSub1').textContent = `${connected} connected · ${total-connected} no answer`;
+  document.getElementById('mTalk').textContent = total?fmtDur(totalSecs):'0m';
+  document.getElementById('mSub2').textContent = `avg ${fmtDur(avgSecs)} per call`;
+  const gEl = document.getElementById('mGap');
+  gEl.textContent = maxGap>0?fmtGap(maxGap):'—';
+  gEl.className = 'metric-value'+(maxGap>2*60?' warn':'');
+  document.getElementById('mSub3').textContent = maxGap>2*60?'⚠️ exceeds 2 min rule':'✅ within limit';
+  document.getElementById('mConn').textContent = total?`${Math.round(connected/total*100)}%`:'—';
+  document.getElementById('mSub4').textContent = `${connected} of ${total} calls`;
+}
+
+function renderCallLog() {
+  const el = document.getElementById('callList');
+  if(!allCalls.length){ el.innerHTML='<div class="empty-state"><i class="ti ti-phone-off"></i>No calls found for this date.</div>'; return; }
+  el.innerHTML = allCalls.map(c=>`
+    <div class="call-row">
+      <div class="avatar" style="${avatarStyle(c.contactName)}">${initials(c.contactName)}</div>
+      <div class="call-info">
+        <div class="call-name">${c.contactName}</div>
+        <div class="call-sub">${callerTag(c.owner)} <span>${c.type}</span></div>
+      </div>
+      <div class="call-right">
+        ${callBadge(c)}
+        <div class="call-dur" style="margin-top:4px">${fmtDur(c.duration)}</div>
+        <div class="call-time-str">${fmtTime(c.startTime)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTimeline() {
+  const el = document.getElementById('timelineEl');
+  if(!allCalls.length){ el.innerHTML='<div class="empty-state"><i class="ti ti-timeline"></i>No calls found.</div>'; return; }
+  let html='';
+  allCalls.forEach((c,i)=>{
+    const dot = c.duration>30?'var(--green)':c.duration>0?'var(--amber)':'#aaa';
+    html+=`<div class="tl-item">
+      <div class="tl-line"></div>
+      <div class="tl-dot" style="background:${dot}"></div>
+      <div class="tl-card">
+        <div class="tl-hdr">
+          <span class="tl-name">${c.contactName} ${callerTag(c.owner)}</span>
+          <span class="tl-meta">${fmtTime(c.startTime)} · ${fmtDur(c.duration)}</span>
+        </div>
+        <div class="tl-meta">${c.type} · ${c.duration>30?'Connected':c.duration>0?'Short call':'No answer'}</div>
+      </div>
+    </div>`;
+    if(i<allCalls.length-1){
+      const gapSec=(allCalls[i+1].startTime-c.startTime)/1000-c.duration;
+      if(gapSec>30){
+        const sev=gapSev(gapSec);
+        html+=`<div class="gap-row"><div class="gap-line"></div><span class="gap-badge gap-${sev}">${fmtGap(gapSec)}${sev!=='ok'?' ⚠️':' ✅'}</span><div class="gap-line"></div></div>`;
+      }
+    }
+  });
+  el.innerHTML=html;
+}
+
+function renderSummary(dateVal) {
+  const el = document.getElementById('summaryEl');
+  if(!allCalls.length){ el.innerHTML='<div class="empty-state"><i class="ti ti-chart-bar"></i>No calls to summarise.</div>'; return; }
+  const total=allCalls.length;
+  const connected=allCalls.filter(c=>c.duration>30);
+  const totalSecs=allCalls.reduce((a,c)=>a+c.duration,0);
+  const longest=allCalls.reduce((a,c)=>c.duration>a.duration?c:a,allCalls[0]);
+  const germaine=allCalls.filter(c=>c.owner.toLowerCase().includes('germaine'));
+  const sarah=allCalls.filter(c=>c.owner.toLowerCase().includes('sarah'));
+  let breaches=[],maxGap=0,maxGapAfter=null;
+  for(let i=1;i<allCalls.length;i++){
+    const g=(allCalls[i].startTime-allCalls[i-1].startTime)/1000-allCalls[i-1].duration;
+    if(g>maxGap){maxGap=g;maxGapAfter=allCalls[i-1];}
+    if(g>2*60)breaches.push({gap:g,from:allCalls[i-1],to:allCalls[i]});
+  }
+  const d=new Date(dateVal+'T12:00:00');
+  el.innerHTML=`
+    <div class="sum-box">
+      <div class="sum-title"><i class="ti ti-chart-bar"></i> Performance snapshot</div>
+      <div class="sum-body">
+        <strong>${total}</strong> calls on ${d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}.
+        Total talk time: <strong>${fmtDur(totalSecs)}</strong> · <strong>${connected.length}</strong> connected · <strong>${total-connected.length}</strong> no answer.
+        ${longest&&longest.duration>0?`Longest call: <strong>${longest.contactName}</strong> at ${fmtDur(longest.duration)}.`:''}
+        ${germaine.length?`<br>Germaine (Nexus): <strong>${germaine.length} calls</strong> · ${germaine.filter(c=>c.duration>30).length} connected.`:''}
+        ${sarah.length?`<br>Sarah (Kendra): <strong>${sarah.length} calls</strong> · ${sarah.filter(c=>c.duration>30).length} connected.`:''}
+      </div>
+    </div>
+    ${breaches.length>0?`
+    <div class="sum-box">
+      <div class="sum-title"><i class="ti ti-alert-triangle"></i> 2-minute rule — ${breaches.length} breach${breaches.length>1?'es':''} flagged</div>
+      <div class="sum-body">${breaches.map(b=>`Gap of <strong>${fmtGap(b.gap)}</strong> after call with ${b.from.contactName} at ${fmtTime(b.from.startTime)}.`).join('<br>')}</div>
+    </div>`:`
+    <div class="sum-box">
+      <div class="sum-title"><i class="ti ti-circle-check"></i> 2-minute rule — no breaches</div>
+      <div class="sum-body">All gaps within the 2-minute limit today. Great work!</div>
+    </div>`}
+    <div class="btn-row">
+      <a href="mailto:j.kothari@kendra-intl.com?subject=End of Day Call Summary ${dateVal}&body=Calls made: ${total}%0AConnected: ${connected.length}%0ATalk time: ${fmtDur(totalSecs)}%0AGap breaches: ${breaches.length}" class="btn"><i class="ti ti-mail"></i> Email summary to Jigisha</a>
+    </div>`;
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+document.getElementById('dateFilter').addEventListener('change', loadCalls);
+document.getElementById('ownerFilter').addEventListener('change', () => renderAll(document.getElementById('dateFilter').value));
+
+loadCalls();
+</script>
+</body>
+</html>
