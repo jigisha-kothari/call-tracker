@@ -24,9 +24,10 @@
   const expiresIn = params.get('expires_in');
 
   if (accessToken) {
-    const expiry = Date.now() + (parseInt(expiresIn) * 1000);
+    const seconds = parseInt(expiresIn) || 3600;
+    const expiry = Date.now() + (seconds * 1000);
     sessionStorage.setItem('zoho_access_token', accessToken);
-    sessionStorage.setItem('zoho_token_expiry', expiry);
+    sessionStorage.setItem('zoho_token_expiry', String(expiry));
     window.location.href = '/call-tracker/';
   } else {
     document.querySelector('p').textContent = 'Authentication failed. Please try again.';
