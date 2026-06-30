@@ -34,10 +34,12 @@ req = urllib.request.Request(
 
 try:
     with urllib.request.urlopen(req) as r:
-        data = json.loads(r.read())
+        raw = r.read()
+        data = json.loads(raw) if raw.strip() else {}
 except urllib.error.HTTPError as e:
-    print("Zoho API error: " + str(e.code) + " " + str(e.read()))
-    sys.exit(1)
+    body = e.read()
+    print("Zoho API error: " + str(e.code) + " " + str(body))
+    data = {}
 
 calls = data.get('data', [])
 
